@@ -1,0 +1,50 @@
+# Optional: Add additional Grafana instances
+# Uncomment and modify as needed
+
+version: '3.8'
+
+services:
+  # Secondary Grafana instance for different team/purpose
+  grafana-security:
+    image: grafana/grafana:latest
+    container_name: grafana-security
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_SECURITY_PASSWORD:-security_grafana_pass}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=http://localhost:3001
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel,grafana-worldmap-panel
+    volumes:
+      - grafana-security-data:/var/lib/grafana
+      - ./monitoring/grafana-security/provisioning:/etc/grafana/provisioning
+    ports:
+      - "3001:3000"
+    networks:
+      - proxy-network
+    profiles:
+      - grafana-multi
+    # Automatically connects to same Prometheus instance
+
+  # Third Grafana for executives/reports  
+  grafana-executive:
+    image: grafana/grafana:latest
+    container_name: grafana-executive
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_EXEC_PASSWORD:-exec_grafana_pass}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=http://localhost:3002
+      - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/var/lib/grafana/dashboards/executive-summary.json
+    volumes:
+      - grafana-exec-data:/var/lib/grafana
+      - ./monitoring/grafana-executive/dashboards:/var/lib/grafana/dashboards
+    ports:
+      - "3002:3000"
+    networks:
+      - proxy-network
+    profiles:
+      - grafana-multi
+
+volumes:
+  grafana-security-data:
+  grafana-exec-data:

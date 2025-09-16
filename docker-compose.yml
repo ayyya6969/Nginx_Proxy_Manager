@@ -1,0 +1,201 @@
+version: '3.8'
+
+services:
+  nginx-proxy-manager:
+    image: 'jc21/nginx-proxy-manager:latest'
+    container_name: nginx-proxy-manager
+    restart: unless-stopped
+    ports:
+      - '80:80'      # Public HTTP Port
+      - '443:443'    # Public HTTPS Port
+      - '81:81'      # Admin Web Port
+    environment:
+      - TZ=${TIMEZONE:-UTC}
+      # Advanced Features Configuration
+      - DISABLE_IPV6=true
+      - NPM_DISABLE_LOGROTATE=false
+      - NPM_LOGROTATE_INTERVAL=daily
+      - NPM_LOGROTATE_RETENTION=7
+    volumes:
+      - ./npm-data:/data
+      - ./npm-letsencrypt:/etc/letsencrypt
+      - ./nginx/logs:/var/log/nginx
+      - ./fail2ban:/fail2ban:ro
+    networks:
+      - proxy-network
+    depends_on:
+      npm-db:
+        condition: service_healthy
+      fail2ban:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:81/api/schema"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    labels:
+      - "com.docker.compose.service=nginx-proxy-manager"
+
+  npm-db:
+    image: 'jc21/mariadb-aria:latest'
+    container_name: npm-db
+    restart: unless-stopped
+    environment:
+      - TZ=${TIMEZONE:-UTC}
+      - MYSQL_ROOT_PASSWORD=${NPM_DB_ROOT_PASSWORD:-changeme123}
+      - MYSQL_DATABASE=${NPM_DB_NAME:-npm}
+      - MYSQL_USER=${NPM_DB_USER:-npm}
+      - MYSQL_PASSWORD=${NPM_DB_PASSWORD:-npm}
+    volumes:
+      - ./npm-db:/var/lib/mysql
+    networks:
+      - proxy-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  fail2ban:
+    image: crazymax/fail2ban:latest
+    container_name: fail2ban
+    restart: unless-stopped
+    network_mode: "host"
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    volumes:
+      - ./fail2ban:/data
+      - ./nginx/logs:/var/log/nginx:ro
+      - /var/log:/var/log:ro
+    environment:
+      - TZ=${TIMEZONE:-UTC}
+      - F2B_LOG_LEVEL=${F2B_LOG_LEVEL:-INFO}
+      - F2B_DB_PURGE_AGE=${F2B_DB_PURGE_AGE:-1d}
+
+  # Add your own backend services here
+  # Example:
+  # my-app:
+  #   image: my-app:latest
+  #   container_name: my-app
+  #   restart: unless-stopped
+  #   networks:
+  #     - proxy-network
+  #   environment:
+  #     - TZ=${TIMEZONE:-UTC}
+
+  # =============================================================================
+  # MONITORING STACK (Grafana + Prometheus + Node Exporter)
+  # =============================================================================
+  
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+      - '--web.external-url=http://localhost:${PROMETHEUS_PORT:-9090}'
+    volumes:
+      - ./monitoring/prometheus:/etc/prometheus
+      - prometheus-data:/prometheus
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    networks:
+      - proxy-network
+    profiles:
+      - monitoring
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-changeme_grafana_password}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=http://localhost:${GRAFANA_PORT:-3000}
+      - GF_LOG_LEVEL=warn
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards
+    ports:
+      - "${GRAFANA_PORT:-3000}:3000"
+    networks:
+      - proxy-network
+    profiles:
+      - grafana
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    restart: unless-stopped
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    networks:
+      - proxy-network
+    profiles:
+      - monitoring
+
+  nginx-exporter:
+    image: nginx/nginx-prometheus-exporter:latest
+    container_name: nginx-exporter
+    restart: unless-stopped
+    command:
+      - -nginx.scrape-uri=http://nginx-proxy-manager:81/api/nginx/proxy_hosts
+    networks:
+      - proxy-network
+    depends_on:
+      - nginx-proxy-manager
+    profiles:
+      - monitoring
+
+  fail2ban-exporter:
+    image: gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:latest
+    container_name: fail2ban-exporter
+    restart: unless-stopped
+    environment:
+      - F2B_DB_PATH=/var/lib/fail2ban/fail2ban.sqlite3
+    volumes:
+      - ./fail2ban:/var/lib/fail2ban:ro
+    networks:
+      - proxy-network
+    depends_on:
+      - fail2ban
+    profiles:
+      - monitoring
+
+volumes:
+  prometheus-data:
+  grafana-data:
+
+networks:
+  proxy-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

@@ -1,0 +1,67 @@
+groups:
+  - name: ddos_detection
+    rules:
+      # HTTP Flood Detection
+      - alert: HTTPFloodDetected
+        expr: rate(nginx_http_requests_total[1m]) > 100
+        for: 30s
+        labels:
+          severity: critical
+          type: ddos
+        annotations:
+          summary: "High HTTP request rate detected"
+          description: "HTTP request rate is {{ $value }} requests/second, which exceeds the threshold of 100 req/sec for {{ $labels.instance }}"
+
+      # Connection Flood
+      - alert: ConnectionFloodDetected
+        expr: nginx_connections_active > 1000
+        for: 30s
+        labels:
+          severity: critical
+          type: ddos
+        annotations:
+          summary: "High connection count detected"
+          description: "Active connections: {{ $value }} on {{ $labels.instance }}"
+
+      # Suspicious Request Patterns
+      - alert: SuspiciousRequestPattern
+        expr: increase(nginx_http_requests_total{status=~"4.."}[5m]) > 50
+        for: 1m
+        labels:
+          severity: warning
+          type: security
+        annotations:
+          summary: "High 4xx error rate detected"
+          description: "{{ $value }} 4xx errors in the last 5 minutes on {{ $labels.instance }}"
+
+      # Fail2Ban Activity
+      - alert: Fail2BanHighActivity
+        expr: increase(f2b_banned_total[5m]) > 5
+        for: 1m
+        labels:
+          severity: warning
+          type: security
+        annotations:
+          summary: "High Fail2Ban banning activity"
+          description: "{{ $value }} IPs banned in the last 5 minutes"
+
+      # System Resource Exhaustion
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 2m
+        labels:
+          severity: warning
+          type: resource
+        annotations:
+          summary: "High CPU usage detected"
+          description: "CPU usage is {{ $value }}% on {{ $labels.instance }}"
+
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 2m
+        labels:
+          severity: warning
+          type: resource
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is {{ $value }}% on {{ $labels.instance }}"
