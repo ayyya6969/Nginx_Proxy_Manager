@@ -1,7 +1,7 @@
 # Optional: Add additional Grafana instances
 # Uncomment and modify as needed
 
-version: '3.8'
+# Docker Compose override for multi-Grafana instances
 
 services:
   # Secondary Grafana instance for different team/purpose

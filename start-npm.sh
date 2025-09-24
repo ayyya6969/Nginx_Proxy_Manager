@@ -22,7 +22,11 @@ mkdir -p npm-data npm-letsencrypt npm-db nginx/logs fail2ban/filter.d
 # Set proper permissions
 echo "🔐 Setting directory permissions..."
 chmod 755 npm-data npm-letsencrypt npm-db nginx/logs
-chmod 644 .env
+chmod 644 .env 2>/dev/null || true
+
+# Fix nginx logs ownership for container mounting
+echo "🔧 Fixing nginx logs permissions..."
+sudo chown -R 101:101 nginx/logs 2>/dev/null || true
 
 # Process environment variables for fail2ban
 if [ -f .env ]; then

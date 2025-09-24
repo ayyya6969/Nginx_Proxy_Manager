@@ -1,4 +1,4 @@
-version: '3.8'
+# Docker Compose file for Nginx Proxy Manager with Security
 
 services:
   nginx-proxy-manager:
@@ -175,7 +175,7 @@ services:
       - monitoring
 
   fail2ban-exporter:
-    image: gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:latest
+    image: hectorjsmith/fail2ban-prometheus-exporter:latest
     container_name: fail2ban-exporter
     restart: unless-stopped
     environment:
