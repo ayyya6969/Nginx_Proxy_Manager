@@ -67,7 +67,6 @@ services:
       - NET_RAW
     volumes:
       - ./fail2ban:/data
-      - ./nginx/logs:/var/log/nginx:ro
       - /var/log:/var/log:ro
     environment:
       - TZ=${TIMEZONE:-UTC}
@@ -174,7 +173,7 @@ services:
       - monitoring
 
   fail2ban-exporter:
-    image: registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:latest
+    image: yolokube/fail2ban-prometheus-exporter:latest
     container_name: fail2ban-exporter
     restart: unless-stopped
     ports:
