@@ -44,18 +44,18 @@ fi
 
 # Start services with health checks
 echo "🐳 Starting core services with health checks..."
-docker-compose up -d --wait
+docker compose up -d --wait
 
 # Check if Prometheus is enabled (independent metrics collection)
 if [ "${ENABLE_PROMETHEUS:-false}" = "true" ]; then
     echo "🔍 Prometheus metrics: ENABLED - Starting metrics collection..."
-    docker-compose --profile monitoring up -d prometheus node-exporter nginx-exporter fail2ban-exporter
+    docker compose --profile monitoring up -d prometheus node-exporter nginx-exporter fail2ban-exporter
     echo "🔍 Prometheus available at: http://localhost:${PROMETHEUS_PORT:-9090}"
     
     # Check if Grafana is also enabled
     if [ "${ENABLE_GRAFANA:-false}" = "true" ]; then
         echo "📊 Grafana dashboard: ENABLED - Starting visualization..."
-        docker-compose --profile grafana up -d
+        docker compose --profile grafana up -d
         echo "📊 Grafana available at: http://localhost:${GRAFANA_PORT:-3000}"
     else
         echo "📊 Grafana dashboard: DISABLED (Prometheus still collecting metrics)"
@@ -64,7 +64,7 @@ if [ "${ENABLE_PROMETHEUS:-false}" = "true" ]; then
     # Check if multi-Grafana is enabled
     if [ "${ENABLE_MULTI_GRAFANA:-false}" = "true" ]; then
         echo "📊 Multi-Grafana: ENABLED - Starting additional instances..."
-        docker-compose --profile grafana-multi up -d
+        docker compose --profile grafana-multi up -d
         echo "🛡️  Security Grafana: http://localhost:3001"
         echo "👔 Executive Grafana: http://localhost:3002"
     fi
@@ -83,10 +83,10 @@ echo ""
 echo "⚠️  IMPORTANT: Change these credentials on first login!"
 echo ""
 echo "📊 Services Status:"
-docker-compose ps --format "table {{.Name}}\t{{.Status}}\t{{.Ports}}"
+docker compose ps --format "table {{.Name}}\t{{.Status}}\t{{.Ports}}"
 echo ""
 echo "📋 Quick Commands:"
-echo "   View logs: docker-compose logs -f [service-name]"
-echo "   Stop all:  docker-compose down"
-echo "   Restart:   docker-compose restart"
+echo "   View logs: docker compose logs -f [service-name]"
+echo "   Stop all:  docker compose down"
+echo "   Restart:   docker compose restart"
 echo "======================================================="

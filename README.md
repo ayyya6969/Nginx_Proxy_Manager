@@ -75,7 +75,7 @@ nano .env
 ./start-npm.sh
 
 # Option 2: Use Docker Compose directly
-docker-compose up -d --wait
+docker compose up -d --wait
 ```
 
 ### 4. Access Web Interface
@@ -132,7 +132,17 @@ GRAFANA_EXEC_PASSWORD=changeme_executive_password       # Port 3002
 | **Rate Limiting** | Prevents request spam | 🟢 ALL HOSTS |
 | **Security Headers** | OWASP recommended headers | 🟢 ALL HOSTS |
 | **Slow DoS Protection** | Blocks Slowloris attacks | 🟢 ALL HOSTS |
+| **Real IP Detection** | Bans actual users behind CDN/proxy | 🟢 ALL HOSTS |
 | **Admin Protection** | Extra protection for NPM interface | 🟡 ADMIN ONLY |
+
+### 🌐 **Cloudflare Integration**
+
+**✅ Cloudflare-Ready Configuration:**
+- **Real IP Detection**: Uses `CF-Connecting-IP` header to identify actual client IPs
+- **Trusted Proxy Ranges**: All current Cloudflare IP ranges are pre-configured
+- **Accurate Banning**: Blocks real users, not Cloudflare proxy servers
+- **Rate Limiting**: Applied to actual client IPs behind Cloudflare
+- **Logging**: Tracks both proxy IP and real client IP for analysis
 
 ### 🔒 Security Jails Configuration
 Advanced Fail2Ban jails automatically active:
@@ -232,39 +242,39 @@ ENABLE_GRAFANA=false        # Use external Grafana instead
 ### 📈 Health Monitoring
 ```bash
 # Check all services
-docker-compose ps
+docker compose ps
 
 # Check Prometheus metrics
 curl http://localhost:9090/-/healthy
 
 # View service logs
-docker-compose logs -f nginx-proxy-manager
-docker-compose logs -f prometheus
-docker-compose logs -f fail2ban
+docker compose logs -f nginx-proxy-manager
+docker compose logs -f prometheus
+docker compose logs -f fail2ban
 
 # Check Fail2Ban status
-docker-compose exec fail2ban fail2ban-client status
+docker compose exec fail2ban fail2ban-client status
 ```
 
 ### 🔍 Log Files
 - **Access Logs**: `./nginx/logs/access.log`
 - **Error Logs**: `./nginx/logs/error.log` 
-- **NPM Logs**: `docker-compose logs nginx-proxy-manager`
-- **Database Logs**: `docker-compose logs npm-db`
+- **NPM Logs**: `docker compose logs nginx-proxy-manager`
+- **Database Logs**: `docker compose logs npm-db`
 
 ### 🛠️ Maintenance Commands
 ```bash
 # Update all images
-docker-compose pull && docker-compose up -d
+docker compose pull && docker compose up -d
 
 # Restart services
-docker-compose restart
+docker compose restart
 
 # Stop all services
-docker-compose down
+docker compose down
 
 # View real-time logs
-docker-compose logs -f
+docker compose logs -f
 ```
 
 ## 🛡️ **COMPREHENSIVE SECURITY FEATURES**
@@ -326,11 +336,11 @@ netstat -tlnp | grep :81
 **Database connection errors**:
 ```bash
 # Check database health
-docker-compose exec npm-db mysqladmin ping -u root -p
+docker compose exec npm-db mysqladmin ping -u root -p
 
 # Reset database
-docker-compose down -v
-docker-compose up -d
+docker compose down -v
+docker compose up -d
 ```
 
 **SSL certificate failures**:
@@ -341,13 +351,13 @@ docker-compose up -d
 ### 🔧 Debugging Commands
 ```bash
 # Test configuration
-docker-compose config
+docker compose config
 
 # Check service health
-docker-compose ps --format "table {{.Name}}\t{{.Status}}\t{{.Health}}"
+docker compose ps --format "table {{.Name}}\t{{.Status}}\t{{.Health}}"
 
 # View detailed logs
-docker-compose logs --tail=100 -f nginx-proxy-manager
+docker compose logs --tail=100 -f nginx-proxy-manager
 ```
 
 ## 🏢 **Enterprise Integration Examples**
@@ -416,7 +426,7 @@ tar -czf npm-backup-$(date +%Y%m%d).tar.gz \
   npm-data npm-letsencrypt .env fail2ban
 
 # Database backup
-docker-compose exec npm-db mysqldump -u root -p npm > npm-db-backup.sql
+docker compose exec npm-db mysqldump -u root -p npm > npm-db-backup.sql
 ```
 
 ## 🤝 Contributing
