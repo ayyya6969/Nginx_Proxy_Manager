@@ -73,8 +73,6 @@ services:
       - TZ=${TIMEZONE:-UTC}
       - F2B_LOG_LEVEL=${F2B_LOG_LEVEL:-INFO}
       - F2B_DB_PURGE_AGE=${F2B_DB_PURGE_AGE:-1d}
-    depends_on:
-      - nginx-proxy-manager
 
   # Add your own backend services here
   # Example:
