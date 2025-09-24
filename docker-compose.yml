@@ -173,19 +173,30 @@ services:
       - monitoring
 
   fail2ban-exporter:
-    image: yolokube/fail2ban-prometheus-exporter:latest
+    build:
+      context: ./scripts
+      dockerfile: Dockerfile.fail2ban-exporter
     container_name: fail2ban-exporter
     restart: unless-stopped
     ports:
       - "9191:9191"
     volumes:
-      - ./fail2ban:/var/run/fail2ban:ro
+      - /var/log:/var/log:ro
+      - ./fail2ban:/var/lib/fail2ban:ro
+    environment:
+      - TZ=${TIMEZONE:-UTC}
     networks:
       - proxy-network
     depends_on:
       - fail2ban
     profiles:
       - monitoring
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9191/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
 volumes:
   prometheus-data:

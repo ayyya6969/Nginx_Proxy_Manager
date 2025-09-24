@@ -1,0 +1,23 @@
+FROM python:3.11-alpine
+
+# Install required packages
+RUN apk add --no-cache tzdata
+
+# Create app directory
+WORKDIR /app
+
+# Copy the metrics script
+COPY fail2ban-metrics.py /app/
+
+# Make script executable
+RUN chmod +x /app/fail2ban-metrics.py
+
+# Expose metrics port
+EXPOSE 9191
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:9191/health || exit 1
+
+# Run the exporter
+CMD ["python3", "/app/fail2ban-metrics.py"]
