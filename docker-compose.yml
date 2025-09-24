@@ -8,7 +8,7 @@ services:
     ports:
       - '80:80'      # Public HTTP Port
       - '443:443'    # Public HTTPS Port
-      - '81:81'      # Admin Web Port
+      - '81:81'      # Admin Web Port (will be proxied)
     environment:
       - TZ=${TIMEZONE:-UTC}
       # Advanced Features Configuration

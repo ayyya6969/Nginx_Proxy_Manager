@@ -137,12 +137,14 @@ GRAFANA_EXEC_PASSWORD=changeme_executive_password       # Port 3002
 
 ### 🌐 **Cloudflare Integration**
 
-**✅ Cloudflare-Ready Configuration:**
-- **Real IP Detection**: Uses `CF-Connecting-IP` header to identify actual client IPs
-- **Trusted Proxy Ranges**: All current Cloudflare IP ranges are pre-configured
-- **Accurate Banning**: Blocks real users, not Cloudflare proxy servers
-- **Rate Limiting**: Applied to actual client IPs behind Cloudflare
-- **Logging**: Tracks both proxy IP and real client IP for analysis
+**✅ NPM Built-in Cloudflare Support:**
+- **Automatic Real IP Detection**: NPM automatically handles `CF-Connecting-IP` headers
+- **No Manual Configuration**: Works out-of-the-box with Cloudflare proxy
+- **Accurate Client IPs**: Bans and rate limits apply to real users, not Cloudflare servers
+- **SSL Compatibility**: Full SSL mode works seamlessly with Let's Encrypt
+- **Admin Interface**: Can be proxied through Cloudflare with proper DNS settings
+
+**⚠️ Important:** NPM manages nginx internally. Custom nginx.conf files will cause conflicts and are automatically backed up by the startup script.
 
 ### 🔒 Security Jails Configuration
 Advanced Fail2Ban jails automatically active:
@@ -157,14 +159,38 @@ Advanced Fail2Ban jails automatically active:
 
 ### 🌐 Adding Proxy Hosts
 
-1. **Access Admin Panel**: http://localhost:81
+1. **Access Admin Panel**: `http://YOUR_VPS_IP:81` or `https://admin.yourdomain.com` (if configured)
 2. **Navigate**: Proxy Hosts → Add Proxy Host
 3. **Configure**:
    - Domain: `app.example.com`
-   - Forward Hostname/IP: `backend-service`
+   - Forward Hostname/IP: `backend-service` or `internal-ip`
    - Forward Port: `8080`
-4. **SSL**: Enable "Request a new SSL Certificate"
-5. **Advanced**: Add custom configurations if needed
+4. **SSL**: Enable "Request a new SSL Certificate" 
+5. **Advanced**: Add custom nginx directives for enhanced security
+
+### 🔐 **Admin Interface Setup with Cloudflare**
+
+**For secure admin access behind Cloudflare:**
+
+1. **Create DNS Record** (DNS-only, gray cloud):
+   ```
+   admin.yourdomain.com → YOUR_VPS_IP
+   ```
+
+2. **Add Admin Proxy Host** in NPM:
+   - **Domain**: `admin.yourdomain.com`
+   - **Forward to**: `127.0.0.1:81` 
+   - **SSL**: ✅ Request new SSL certificate
+   - **Advanced Tab**:
+   ```nginx
+   location / {
+       # Strict rate limiting for admin
+       limit_req zone=npm burst=5 nodelay;
+       proxy_set_header X-Admin-Access "true";
+   }
+   ```
+
+3. **Access**: `https://admin.yourdomain.com` (standard HTTPS port)
 
 **🛡️ SECURITY AUTO-APPLIED**: Every host you add automatically gets:
 - ✅ DDoS protection
@@ -326,12 +352,20 @@ Applied to ALL proxy hosts:
 
 ### ❌ Common Issues
 
-**Port conflicts**:
+**NPM Proxy Host Creation Fails (500/400 errors)**:
 ```bash
-# Check what's using port 81
-netstat -tlnp | grep :81
-# Change port in docker-compose.yml if needed
+# Check for nginx config conflicts
+docker compose logs nginx-proxy-manager --tail=50
+
+# Common cause: Custom nginx.conf conflicts with NPM
+# Solution: Restart script automatically backs up conflicting files
+./start-npm.sh
 ```
+
+**Cloudflare SSL Handshake Failures**:
+- Set Cloudflare SSL mode to **"Full"** or **"Full (strict)"** 
+- NOT "Flexible" mode
+- Use DNS-only (gray cloud) for admin domains initially
 
 **Database connection errors**:
 ```bash
@@ -343,10 +377,10 @@ docker compose down -v
 docker compose up -d
 ```
 
-**SSL certificate failures**:
-- Verify domain DNS points to your server
-- Check domain ownership
-- Ensure ports 80/443 are accessible from internet
+**Admin interface not accessible**:
+- Access via server IP: `http://YOUR_VPS_IP:81`
+- Create admin proxy host for domain access
+- Check NPM logs for configuration errors
 
 ### 🔧 Debugging Commands
 ```bash

@@ -17,16 +17,32 @@ fi
 
 # Create necessary directories
 echo "📁 Creating required directories..."
-mkdir -p npm-data npm-letsencrypt npm-db nginx/logs fail2ban/filter.d
+mkdir -p npm-data npm-letsencrypt npm-db fail2ban/filter.d
+
+# Handle NPM nginx configuration conflicts
+echo "🔧 Checking NPM nginx configuration compatibility..."
+if [ -f "nginx/nginx.conf" ]; then
+    echo "⚠️  Found custom nginx.conf - NPM manages nginx internally"
+    echo "📁 Backing up custom nginx.conf to nginx/nginx.conf.backup"
+    mv nginx/nginx.conf nginx/nginx.conf.backup 2>/dev/null || true
+fi
+
+if [ -d "nginx/conf.d" ]; then
+    echo "📁 Backing up custom conf.d to nginx/conf.d.backup"
+    mv nginx/conf.d nginx/conf.d.backup 2>/dev/null || true
+fi
+
+if [ -d "nginx/ssl" ]; then
+    echo "📁 Preserving SSL certificates directory"
+    # Keep SSL directory for custom certificates if needed
+fi
+
+echo "✅ NPM will use its internal nginx configuration"
 
 # Set proper permissions
 echo "🔐 Setting directory permissions..."
-chmod 755 npm-data npm-letsencrypt npm-db nginx/logs
+chmod 755 npm-data npm-letsencrypt npm-db
 chmod 644 .env 2>/dev/null || true
-
-# Fix nginx logs ownership for container mounting
-echo "🔧 Fixing nginx logs permissions..."
-sudo chown -R 101:101 nginx/logs 2>/dev/null || true
 
 # Process environment variables for fail2ban
 if [ -f .env ]; then
