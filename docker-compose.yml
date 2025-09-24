@@ -19,7 +19,6 @@ services:
     volumes:
       - ./npm-data:/data
       - ./npm-letsencrypt:/etc/letsencrypt
-      - ./nginx/logs:/var/log/nginx
       - ./fail2ban:/fail2ban:ro
     networks:
       - proxy-network
@@ -175,13 +174,13 @@ services:
       - monitoring
 
   fail2ban-exporter:
-    image: hectorjsmith/fail2ban-prometheus-exporter:latest
+    image: registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:latest
     container_name: fail2ban-exporter
     restart: unless-stopped
-    environment:
-      - F2B_DB_PATH=/var/lib/fail2ban/fail2ban.sqlite3
+    ports:
+      - "9191:9191"
     volumes:
-      - ./fail2ban:/var/lib/fail2ban:ro
+      - ./fail2ban:/var/run/fail2ban:ro
     networks:
       - proxy-network
     depends_on:
