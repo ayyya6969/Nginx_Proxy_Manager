@@ -52,11 +52,19 @@ if [ -f .env ]; then
     # Configure Telegram notifications if enabled
     if [ "${ENABLE_TELEGRAM_NOTIFICATIONS:-false}" = "true" ]; then
         echo "📱 Telegram notifications: ENABLED"
-        envsubst < fail2ban/jail.local > fail2ban/jail.local.tmp && mv fail2ban/jail.local.tmp fail2ban/jail.local
+        
+        # Replace telegram token placeholders with actual values from .env
+        if [ -n "${TELEGRAM_BOT_TOKEN:-}" ] && [ "${TELEGRAM_BOT_TOKEN}" != "your_bot_token_here" ]; then
+            sed -i "s/telegram_token = %(telegram_token)s/telegram_token = ${TELEGRAM_BOT_TOKEN}/" fail2ban/jail.local
+            sed -i "s/telegram_chat_id = %(telegram_chat_id)s/telegram_chat_id = ${TELEGRAM_CHAT_ID}/" fail2ban/jail.local
+            echo "✅ Telegram tokens configured from .env"
+        else
+            echo "⚠️ Telegram tokens not configured in .env - notifications may not work"
+        fi
     else
         echo "📱 Telegram notifications: DISABLED"
         # Remove Telegram actions from jail.local
-        sed 's/telegram\[token="[^"]*", chat_id="[^"]*"\]//g' fail2ban/jail.local > fail2ban/jail.local.tmp && mv fail2ban/jail.local.tmp fail2ban/jail.local
+        sed -i 's/telegram\[token="[^"]*", chat_id="[^"]*"\]//g' fail2ban/jail.local
     fi
 else
     echo "⚠️ No .env file found - using defaults"

@@ -362,6 +362,31 @@ docker compose logs nginx-proxy-manager --tail=50
 ./start-npm.sh
 ```
 
+**Fail2ban has 0 jails loaded**:
+```bash
+# Check if fail2ban can access NPM logs
+docker compose exec fail2ban ls -la /data/npm-logs/
+
+# Check fail2ban jail status
+docker compose exec fail2ban fail2ban-client status
+
+# If no jails load, restart services
+docker compose restart fail2ban
+```
+
+**Telegram notifications not working**:
+```bash
+# Update .env with real Telegram credentials
+TELEGRAM_BOT_TOKEN=your_real_bot_token
+TELEGRAM_CHAT_ID=your_real_chat_id
+ENABLE_TELEGRAM_NOTIFICATIONS=true
+
+# Test manually
+curl -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
+  -H 'Content-Type: application/json' \
+  -d '{"chat_id": "'$TELEGRAM_CHAT_ID'", "text": "Test from NPM"}'
+```
+
 **Cloudflare SSL Handshake Failures**:
 - Set Cloudflare SSL mode to **"Full"** or **"Full (strict)"** 
 - NOT "Flexible" mode

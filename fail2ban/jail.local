@@ -18,8 +18,8 @@ banaction = iptables-multiport
 protocol = tcp
 
 # Telegram notifications
-telegram_token = ${TELEGRAM_BOT_TOKEN}
-telegram_chat_id = ${TELEGRAM_CHAT_ID}
+telegram_token = %(telegram_token)s
+telegram_chat_id = %(telegram_chat_id)s
 
 # Email notifications (uncomment and configure to enable)
 # destemail = your-email@example.com
@@ -30,14 +30,14 @@ telegram_chat_id = ${TELEGRAM_CHAT_ID}
 [nginx-http-auth]
 enabled = true
 port = http,https
-logpath = /var/log/nginx/error.log
+logpath = /data/npm-logs/fallback_error.log
 maxretry = 3
 bantime = 3600
 
 [nginx-limit-req]
 enabled = true
 port = http,https
-logpath = /var/log/nginx/error.log
+logpath = /data/npm-logs/fallback_error.log
 maxretry = 10
 findtime = 600
 bantime = 3600
@@ -45,28 +45,28 @@ bantime = 3600
 [nginx-botsearch]
 enabled = true
 port = http,https
-logpath = /var/log/nginx/access.log
+logpath = /data/npm-logs/fallback_access.log
 maxretry = 2
 bantime = 7200
 
 [nginx-badbots]
 enabled = true
 port = http,https
-logpath = /var/log/nginx/access.log
+logpath = /data/npm-logs/fallback_access.log
 maxretry = 2
 bantime = 86400
 
 [nginx-noscript]
 enabled = true
 port = http,https
-logpath = /var/log/nginx/access.log
+logpath = /data/npm-logs/fallback_access.log
 maxretry = 6
 bantime = 3600
 
 [nginx-noproxy]
 enabled = true
 port = http,https
-logpath = /var/log/nginx/access.log
+logpath = /data/npm-logs/fallback_access.log
 maxretry = 2
 bantime = 3600
 
@@ -74,7 +74,7 @@ bantime = 3600
 [npm-admin]
 enabled = true
 port = 81
-logpath = /var/log/nginx/access.log
+logpath = /data/npm-logs/fallback_access.log
 filter = npm-admin
 maxretry = 3
 bantime = 7200
@@ -83,7 +83,7 @@ findtime = 300
 [npm-general-forceful-browsing]
 enabled = true
 port = http,https
-logpath = /var/log/nginx/access.log
+logpath = /data/npm-logs/fallback_access.log
 filter = npm-general-forceful-browsing
 maxretry = 5
 bantime = 3600
@@ -91,7 +91,7 @@ bantime = 3600
 [npm-proxy-manager]
 enabled = true
 port = http,https
-logpath = /var/log/nginx/proxy_host_*.log
+logpath = /data/npm-logs/proxy-host-*_access.log
 filter = npm-proxy-manager
 maxretry = 3
 bantime = 1800
@@ -100,7 +100,7 @@ bantime = 1800
 [nginx-ddos]
 enabled = true
 port = http,https
-logpath = /var/log/nginx/access.log
+logpath = /data/npm-logs/fallback_access.log
 filter = nginx-ddos
 maxretry = 20
 findtime = 60
@@ -111,7 +111,7 @@ action = %(action_)s
 [nginx-http-flood]
 enabled = true
 port = http,https
-logpath = /var/log/nginx/access.log
+logpath = /data/npm-logs/fallback_access.log
 filter = nginx-http-flood
 maxretry = 50
 findtime = 300
@@ -122,7 +122,7 @@ action = %(action_)s
 [nginx-slow-dos]
 enabled = true
 port = http,https
-logpath = /var/log/nginx/access.log
+logpath = /data/npm-logs/fallback_access.log
 filter = nginx-slow-dos
 maxretry = 5
 findtime = 300
