@@ -10,7 +10,8 @@ services:
       - '443:443'    # Public HTTPS Port
       - '81:81'      # Admin Web Port (will be proxied)
     environment:
-      - TZ=${TIMEZONE:-UTC}
+      - TZ=${TZ:-UTC}
+      - TIMEZONE=${TIMEZONE:-UTC}
       # Advanced Features Configuration
       - DISABLE_IPV6=true
       - NPM_DISABLE_LOGROTATE=false
