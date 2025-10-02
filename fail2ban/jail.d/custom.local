@@ -142,7 +142,7 @@ logpath = /data/npm-logs/proxy-host-1_access.log
          /data/npm-logs/proxy-host-6_access.log
          /data/npm-logs/proxy-host-7_access.log
 filter = npm-proxy-host-flood
-action = %(action_)s
+action = iptables-multiport[name=npm-flood, port="http,https", protocol=tcp, chain=DOCKER-USER]
          cloudflare-apiv4[cftoken="%(cloudflare_token)s"]
 maxretry = 300
 findtime = 60
