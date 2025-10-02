@@ -43,6 +43,7 @@ echo "✅ NPM will use its internal nginx configuration"
 echo "🔐 Setting directory permissions..."
 chmod 755 npm-data npm-letsencrypt npm-db
 chmod 644 .env 2>/dev/null || true
+chmod +x scripts/*.sh 2>/dev/null || true
 
 # Process environment variables for fail2ban
 if [ -f .env ]; then
