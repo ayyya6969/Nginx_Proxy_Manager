@@ -200,6 +200,19 @@ services:
       retries: 3
       start_period: 10s
 
+  npm-realip-fixer:
+    image: docker:cli
+    container_name: npm-realip-fixer
+    restart: "no"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./scripts:/scripts:ro
+    command: sh /scripts/fix-npm-realip.sh
+    depends_on:
+      nginx-proxy-manager:
+        condition: service_healthy
+    network_mode: none
+
 volumes:
   prometheus-data:
   grafana-data:
