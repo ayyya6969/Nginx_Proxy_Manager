@@ -100,7 +100,14 @@ bantime = 1800
 [nginx-ddos]
 enabled = true
 port = http,https
-logpath = /data/npm-logs/fallback_access.log /data/npm-logs/proxy-host-*_access.log
+logpath = /data/npm-logs/fallback_access.log
+         /data/npm-logs/proxy-host-1_access.log
+         /data/npm-logs/proxy-host-2_access.log
+         /data/npm-logs/proxy-host-3_access.log
+         /data/npm-logs/proxy-host-4_access.log
+         /data/npm-logs/proxy-host-5_access.log
+         /data/npm-logs/proxy-host-6_access.log
+         /data/npm-logs/proxy-host-7_access.log
 filter = nginx-ddos
 maxretry = 100
 findtime = 10
@@ -109,7 +116,14 @@ bantime = 7200
 [nginx-http-flood]
 enabled = true
 port = http,https
-logpath = /data/npm-logs/fallback_access.log /data/npm-logs/proxy-host-*_access.log
+logpath = /data/npm-logs/fallback_access.log
+         /data/npm-logs/proxy-host-1_access.log
+         /data/npm-logs/proxy-host-2_access.log
+         /data/npm-logs/proxy-host-3_access.log
+         /data/npm-logs/proxy-host-4_access.log
+         /data/npm-logs/proxy-host-5_access.log
+         /data/npm-logs/proxy-host-6_access.log
+         /data/npm-logs/proxy-host-7_access.log
 filter = nginx-http-flood
 maxretry = 300
 findtime = 60
