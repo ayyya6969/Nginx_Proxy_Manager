@@ -18,7 +18,7 @@ ignoreip = 127.0.0.1/8 ::1
            203.104.31.15
 
 # Advanced settings for NPM integration
-chain = INPUT
+chain = FORWARD
 action = %(action_)s
 banaction = iptables-multiport
 protocol = tcp
