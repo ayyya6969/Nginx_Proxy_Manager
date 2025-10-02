@@ -19,13 +19,6 @@ fi
 echo "📁 Creating required directories..."
 mkdir -p npm-data npm-letsencrypt npm-db fail2ban/filter.d fail2ban/jail.d
 
-# Copy jail.local to jail.d for fail2ban to load it
-echo "🔧 Preparing fail2ban configuration..."
-if [ -f "fail2ban/jail.local" ]; then
-    cp fail2ban/jail.local fail2ban/jail.d/custom.local
-    echo "✅ Fail2ban jail configuration ready"
-fi
-
 # Handle NPM nginx configuration conflicts
 echo "🔧 Checking NPM nginx configuration compatibility..."
 if [ -f "nginx/nginx.conf" ]; then
