@@ -131,6 +131,7 @@ bantime = 3600
 [npm-proxy-host-flood]
 enabled = true
 port = http,https
+protocol = tcp
 logpath = /data/npm-logs/proxy-host-1_access.log
          /data/npm-logs/proxy-host-2_access.log
          /data/npm-logs/proxy-host-3_access.log
