@@ -131,7 +131,6 @@ bantime = 3600
 [npm-proxy-host-flood]
 enabled = true
 port = http,https
-protocol = tcp
 logpath = /data/npm-logs/proxy-host-1_access.log
          /data/npm-logs/proxy-host-2_access.log
          /data/npm-logs/proxy-host-3_access.log
@@ -140,6 +139,7 @@ logpath = /data/npm-logs/proxy-host-1_access.log
          /data/npm-logs/proxy-host-6_access.log
          /data/npm-logs/proxy-host-7_access.log
 filter = npm-proxy-host-flood
+action = nginx-block-map
 maxretry = 300
 findtime = 60
 bantime = 3600
