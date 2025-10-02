@@ -123,14 +123,22 @@ bantime = 7200
 enabled = true
 port = http,https
 logpath = /data/npm-logs/fallback_access.log
-         /data/npm-logs/proxy-host-1_access.log
+filter = nginx-http-flood
+maxretry = 300
+findtime = 60
+bantime = 3600
+
+[npm-proxy-host-flood]
+enabled = true
+port = http,https
+logpath = /data/npm-logs/proxy-host-1_access.log
          /data/npm-logs/proxy-host-2_access.log
          /data/npm-logs/proxy-host-3_access.log
          /data/npm-logs/proxy-host-4_access.log
          /data/npm-logs/proxy-host-5_access.log
          /data/npm-logs/proxy-host-6_access.log
          /data/npm-logs/proxy-host-7_access.log
-filter = nginx-http-flood
+filter = npm-proxy-host-flood
 maxretry = 300
 findtime = 60
 bantime = 3600
