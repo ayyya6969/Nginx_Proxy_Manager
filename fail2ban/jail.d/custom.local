@@ -27,6 +27,9 @@ protocol = tcp
 telegram_token = %(telegram_token)s
 telegram_chat_id = %(telegram_chat_id)s
 
+# Cloudflare API token (optional - for blocking at edge)
+cloudflare_token = %(cloudflare_token)s
+
 # Email notifications (uncomment and configure to enable)
 # destemail = your-email@example.com
 # sender = fail2ban@yourdomain.com
@@ -139,7 +142,8 @@ logpath = /data/npm-logs/proxy-host-1_access.log
          /data/npm-logs/proxy-host-6_access.log
          /data/npm-logs/proxy-host-7_access.log
 filter = npm-proxy-host-flood
-action = nginx-block-map
+action = %(action_)s
+         cloudflare-apiv4[cftoken="%(cloudflare_token)s"]
 maxretry = 300
 findtime = 60
 bantime = 3600
