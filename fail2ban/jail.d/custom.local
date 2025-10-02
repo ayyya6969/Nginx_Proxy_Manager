@@ -140,7 +140,7 @@ logpath = /data/npm-logs/proxy-host-1_access.log
          /data/npm-logs/proxy-host-7_access.log
 filter = npm-proxy-host-flood
 action = iptables-multiport[name=npm-flood, port="http,https", protocol=tcp, chain=DOCKER-USER]
-maxretry = 300
+maxretry = 100
 findtime = 60
 bantime = 3600
 
