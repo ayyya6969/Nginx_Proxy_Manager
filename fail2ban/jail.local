@@ -11,6 +11,12 @@ maxretry = 5
 # Backend for storing bans
 backend = auto
 
+# Whitelist - IPs that should never be banned
+# Add your monitoring services, admin IPs, etc.
+ignoreip = 127.0.0.1/8 ::1
+           172.20.0.0/16
+           203.104.31.15
+
 # Advanced settings for NPM integration
 chain = DOCKER-USER
 action = %(action_)s
