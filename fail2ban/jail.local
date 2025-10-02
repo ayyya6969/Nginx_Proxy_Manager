@@ -100,26 +100,20 @@ bantime = 1800
 [nginx-ddos]
 enabled = true
 port = http,https
-logpath = /data/npm-logs/fallback_access.log
-         /data/npm-logs/proxy-host-*_access.log
+logpath = /data/npm-logs/fallback_access.log /data/npm-logs/proxy-host-*_access.log
 filter = nginx-ddos
-maxretry = 20
-findtime = 60
+maxretry = 100
+findtime = 10
 bantime = 7200
-action = %(action_)s
-         telegram[token="%(telegram_token)s", chat_id="%(telegram_chat_id)s"]
 
 [nginx-http-flood]
 enabled = true
 port = http,https
-logpath = /data/npm-logs/fallback_access.log
-         /data/npm-logs/proxy-host-*_access.log
+logpath = /data/npm-logs/fallback_access.log /data/npm-logs/proxy-host-*_access.log
 filter = nginx-http-flood
-maxretry = 50
-findtime = 300
+maxretry = 300
+findtime = 60
 bantime = 3600
-action = %(action_)s
-         telegram[token="%(telegram_token)s", chat_id="%(telegram_chat_id)s"]
 
 [nginx-slow-dos]
 enabled = true
@@ -129,5 +123,3 @@ filter = nginx-slow-dos
 maxretry = 5
 findtime = 300
 bantime = 7200
-action = %(action_)s
-         telegram[token="%(telegram_token)s", chat_id="%(telegram_chat_id)s"]
